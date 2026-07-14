@@ -15,15 +15,11 @@ tabela = tabela.dropna ()# Dropamos tcolunas vazias
 
 display(tabela["regiao"].value_counts(normalize=True) ) #Mostramos em forma de porcentagem selecionando a coluna região e contando a quantidade de vendas por região 
 
-for coluna in tabela.columns: #Declaramos um loop que percorre todas as linhas e colunas e vão ter base em produtos ou qualquer outra coluna
-    grafico = px.histogram(tabela, x=coluna, color="produto", text_auto=True) #Mostram todas as colunas relaciuonadas a produtos e região 
-    grafico.show()
-
 # Quantidade vendida por produto
 quantidade_produto = tabela.groupby("produto")["quantidade"].sum().sort_values(ascending=False)
 display(quantidade_produto)
 
-# Faturamento por produto
+# Faturamento por produto ,groupby agrupa os dados como se fosse o excel em fazer um gráfico com a coluna produto e somando tudo que existe em valor
 faturamento_produto = tabela.groupby("produto")["valor"].sum().sort_values(ascending=False)
 display(faturamento_produto)
 
@@ -62,3 +58,14 @@ grafico_temporal.update_layout(
 )
 
 grafico_temporal.show()
+
+analise_Faturamentoregiao = tabela.groupby("regiao")["valor"].sum().sort_values(ascending=False)
+
+grafico_Faturamentoregiao = px.bar(analise_Faturamentoregiao, x=analise_Faturamentoregiao.index, y=analise_Faturamentoregiao.values, title="Faturamento por região")
+
+grafico_Faturamentoregiao.show()
+
+analise_QntdRegiao = tabela.groupby("regiao")["quantidade"].sum().sort_values(ascending=False)
+
+grafico_QntdRegiao = px.bar(analise_QntdRegiao, x=analise_QntdRegiao.index, y =analise_QntdRegiao.values, title ="Quantidade vendida por região" )
+grafico_QntdRegiao.show()
