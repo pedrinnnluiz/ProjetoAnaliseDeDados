@@ -2,70 +2,103 @@ import pandas as pd
 import plotly.express as px
 from IPython.display import display
 import plotly.io as pio
+
+# Configuração para abrir gráficos no navegador
 pio.renderers.default = "browser"
 
-
+# --- Importação e preparação da base ---
 tabela = pd.read_csv('produtos_loja.csv')
 
-display(tabela)#Mostra a tabela formalizada
+display(tabela)  # Mostra a tabela
+tabela.info()    # Mostra informações da tabela
 
-tabela.info() #Mostra informações da tabela como tipos de dados
+# Remove linhas com valores nulos
+tabela = tabela.dropna()
 
-tabela = tabela.dropna ()# Dropamos tcolunas vazias
+# Distribuição percentual por região
+display(tabela["regiao"].value_counts(normalize=True))
 
-display(tabela["regiao"].value_counts(normalize=True) ) #Mostramos em forma de porcentagem selecionando a coluna região e contando a quantidade de vendas por região 
-
-# Quantidade vendida por produto
+# --- Quantidade vendida por produto ---
 quantidade_produto = tabela.groupby("produto")["quantidade"].sum().sort_values(ascending=False)
 display(quantidade_produto)
 
-# Faturamento por produto ,groupby agrupa os dados como se fosse o excel em fazer um gráfico com a coluna produto e somando tudo que existe em valor
+# --- Faturamento por produto ---
 faturamento_produto = tabela.groupby("produto")["valor"].sum().sort_values(ascending=False)
 display(faturamento_produto)
 
-# Gráfico de barras do faturamento
-grafico_produto = px.bar(faturamento_produto, x=faturamento_produto.index, y=faturamento_produto.values,
-                         title="Faturamento por Produto")
+# Gráfico de faturamento por produto
+grafico_produto = px.bar(
+    faturamento_produto,
+    x=faturamento_produto.index,
+    y=faturamento_produto.values,
+    title="Faturamento por Produto",
+    labels={"x":"Produto", "y":"Faturamento (R$)"},
+    text=faturamento_produto.values,
+    color=faturamento_produto.index,
+    color_discrete_sequence=px.colors.qualitative.Set2
+)
+grafico_produto.update_traces(textposition="outside")
+grafico_produto.update_layout(template="plotly_white", title_font=dict(size=20), font=dict(size=14))
 grafico_produto.show()
-#Transformação da coluna data para a ferramenta do panda date time que cria outras colunas a partir de uma data 
+
+# --- Tratamento da coluna de data ---
 tabela["data"] = pd.to_datetime(tabela["data"])
-
 tabela["mes"] = tabela["data"].dt.month
-
 tabela["ano"] = tabela["data"].dt.year
 
 display(tabela.head())
-#Aqui temos agrupamento da coluna mes e depois somando todos os valores por mes ordenados em decrescente 
+
+# --- Faturamento por mês ---
 faturamento_meses = tabela.groupby("mes")["valor"].sum().sort_values(ascending=False)
 display(faturamento_meses)
 
 grafico_temporal = px.line(
     faturamento_meses,
-    x=faturamento_meses.index,       # eixo X: meses
-    y=faturamento_meses.values,      # eixo Y: faturamento
-    title="Faturamento por Meses",   # título do gráfico
-    markers=True,                    # adiciona bolinhas nos pontos
-    labels={"x":"Mês", "y":"Faturamento (R$)"}, # rótulos dos eixos
+    x=faturamento_meses.index,
+    y=faturamento_meses.values,
+    title="Faturamento por Meses",
+    markers=True,
+    labels={"x":"Mês", "y":"Faturamento (R$)"}
 )
-
-# Ajustes visuais extras
 grafico_temporal.update_layout(
-    template="plotly_dark",          # estilo escuro moderno
-    xaxis=dict(showgrid=False),      # remove grade do eixo X
-    yaxis=dict(showgrid=True, gridcolor="lightgrey"), # grade suave no Y
-    title_font=dict(size=20, color="white"),          # título maior e branco
-    font=dict(size=14, color="white")                 # fonte geral
+    template="plotly_dark",
+    xaxis=dict(showgrid=False),
+    yaxis=dict(showgrid=True, gridcolor="lightgrey"),
+    title_font=dict(size=20, color="white"),
+    font=dict(size=14, color="white")
 )
-
 grafico_temporal.show()
 
-analise_Faturamentoregiao = tabela.groupby("regiao")["valor"].sum().sort_values(ascending=False)
+# --- Faturamento por região ---
+faturamento_regiao = tabela.groupby("regiao")["valor"].sum().sort_values(ascending=False)
 
-grafico_Faturamentoregiao = px.bar(analise_Faturamentoregiao, x=analise_Faturamentoregiao.index, y=analise_Faturamentoregiao.values, title="Faturamento por região")
+grafico_faturamento_regiao = px.bar(
+    faturamento_regiao,
+    x=faturamento_regiao.index,
+    y=faturamento_regiao.values,
+    title="Faturamento por Região",
+    labels={"x":"Região", "y":"Faturamento (R$)"},
+    text=faturamento_regiao.values,
+    color=faturamento_regiao.index,
+    color_discrete_sequence=px.colors.qualitative.Set2
+)
+grafico_faturamento_regiao.update_traces(textposition="outside")
+grafico_faturamento_regiao.update_layout(template="plotly_white", title_font=dict(size=20), font=dict(size=14))
+grafico_faturamento_regiao.show()
 
-grafico_Faturamentoregiao.show()
+# --- Quantidade por região ---
+quantidade_regiao = tabela.groupby("regiao")["quantidade"].sum().sort_values(ascending=False)
 
-analise_QntdRegiao = tabela.groupby("regiao")["quantidade"].sum().sort_values(ascending=False)
-
-grafico_QntdRegiao = px.bar(analise_QntdRegiao, x=analise_QntdRegiao.index, y =analise_QntdRegiao.values, title ="Quantidade vendida por região" )
-grafico_QntdRegiao.show()
+grafico_quantidade_regiao = px.bar(
+    quantidade_regiao,
+    x=quantidade_regiao.index,
+    y=quantidade_regiao.values,
+    title="Quantidade Vendida por Região",
+    labels={"x":"Região", "y":"Quantidade"},
+    text=quantidade_regiao.values,
+    color=quantidade_regiao.index,
+    color_discrete_sequence=px.colors.qualitative.Pastel
+)
+grafico_quantidade_regiao.update_traces(textposition="outside")
+grafico_quantidade_regiao.update_layout(template="plotly_white", title_font=dict(size=20), font=dict(size=14))
+grafico_quantidade_regiao.show()
