@@ -102,3 +102,22 @@ grafico_quantidade_regiao = px.bar(
 grafico_quantidade_regiao.update_traces(textposition="outside")
 grafico_quantidade_regiao.update_layout(template="plotly_white", title_font=dict(size=20), font=dict(size=14))
 grafico_quantidade_regiao.show()
+
+# Exibir os Top 5 mais vendidos
+top5_quantidade = quantidade_produto.head(5)
+display(top5_quantidade)
+
+# Gráfico dos Top 5 mais vendidos
+grafico_top5_quantidade = px.bar(
+    top5_quantidade,
+    x=top5_quantidade.index,
+    y=top5_quantidade.values,
+    title="Top 5 Produtos Mais Vendidos",
+    labels={"x":"Produto", "y":"Quantidade Vendida"},
+    text=top5_quantidade.values,
+    color=top5_quantidade.index,
+    color_discrete_sequence=px.colors.qualitative.Set2
+)
+grafico_top5_quantidade.update_traces(textposition="outside")
+grafico_top5_quantidade.update_layout(template="plotly_white", title_font=dict(size=20), font=dict(size=14))
+grafico_top5_quantidade.show()
