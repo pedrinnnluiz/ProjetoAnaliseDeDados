@@ -121,3 +121,53 @@ grafico_top5_quantidade = px.bar(
 grafico_top5_quantidade.update_traces(textposition="outside")
 grafico_top5_quantidade.update_layout(template="plotly_white", title_font=dict(size=20), font=dict(size=14))
 grafico_top5_quantidade.show()
+
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+
+# Criar layout com 1 linha e 2 colunas
+fig = make_subplots(rows=1, cols=2, subplot_titles=("Faturamento por Região", "Quantidade por Região"))
+
+# Adicionar gráfico de faturamento
+fig.add_trace(
+    go.Bar(x=faturamento_regiao.index, y=faturamento_regiao.values, name="Faturamento"),
+    row=1, col=1
+)
+
+# Adicionar gráfico de quantidade
+fig.add_trace(
+    go.Bar(x=quantidade_regiao.index, y=quantidade_regiao.values, name="Quantidade"),
+    row=1, col=2
+)
+
+fig.update_layout(title_text="Comparação por Região", template="plotly_white")
+fig.show()
+
+faturamento_meses_ordenado = tabela.groupby("mes")["valor"].sum().sort_index()
+faturamento_meses_ordenado_rolling = faturamento_meses_ordenado.rolling(window=3).mean()
+
+grafico_media_movel = px.line(x=faturamento_meses_ordenado.index,
+                              y=faturamento_meses_ordenado.values,
+                              title="Projeção com Média Móvel (3 meses)",
+                              labels={"x":"Mês", "y":"Faturamento Projetado (R$)"})
+grafico_media_movel.show()
+
+from sklearn.linear_model import LinearRegression
+import numpy as np
+
+# Preparar dados
+X = faturamento_meses_ordenado.index.values.reshape(-1,1)
+y = faturamento_meses_ordenado.values
+
+# Treinar modelo
+modelo = LinearRegression()
+modelo.fit(X, y)
+
+# Prever próximos 3 meses
+meses_futuros = np.array([13,14,15]).reshape(-1,1)
+previsao = modelo.predict(meses_futuros)
+
+# Gráfico com histórico + previsão
+grafico_regressao = px.scatter(x=faturamento_meses_ordenado.index, y=y, title="Projeção com Regressão Linear")
+grafico_regressao.add_scatter(x=meses_futuros.flatten(), y=previsao, mode="lines+markers", name="Previsão")
+grafico_regressao.show()
